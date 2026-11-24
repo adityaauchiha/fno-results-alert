@@ -1,0 +1,29 @@
+name: Daily NSE F&O Results Alert
+
+on:
+  schedule:
+    # Runs daily at 7:17 PM IST (13:47 UTC) - off-minute avoids GitHub's :00/:30 queue spikes
+    - cron: "47 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run F&O results script
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+        run: python fetch_fno_results.py
